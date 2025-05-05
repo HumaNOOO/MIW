@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using System.Text;
 
-NeuralNetwork nn = new NeuralNetwork([2, 2, 1]);
+NeuralNetwork nn = new([2, 2, 1]);
 
 List<Specimen> population = [];
 
@@ -16,7 +16,6 @@ Console.WriteLine("generacja 0 najlepsze przystosowanie: {0}, średnie przystoso
                   fitness(best, nn),
                   averageFitness(population, nn));
 
-Stopwatch sw = Stopwatch.StartNew();
 for (int gen = 1; gen <= Globals.GENERATION_COUNT; gen++)
 {
     List<Specimen> newPopulation = [];
@@ -64,15 +63,12 @@ for (int gen = 1; gen <= Globals.GENERATION_COUNT; gen++)
     newPopulation.Add(new Specimen(bestSpecimen));
 
     population = newPopulation;
-    //Console.WriteLine("generacja {0} najlepsze przystosowanie: {1}, średnie przystosowanie: {2}",
-                      //gen,
-                      //fitness(getBestSpecimen(newPopulation), nn).ToString("F15"),
-                      //averageFitness(population, nn).ToString("F15"));
+    Console.WriteLine("generacja {0} najlepsze przystosowanie: {1}, średnie przystosowanie: {2}",
+                      gen,
+                      fitness(getBestSpecimen(newPopulation), nn).ToString("F15"),
+                      averageFitness(population, nn).ToString("F15"));
 }
-Console.WriteLine(sw.Elapsed.TotalSeconds);
 nn.PrintParams();
-//Console.Write("best params found: ");
-//getBestSpecimen(population).PrintParams(vals);
 
 double averageFitness(List<Specimen> specimens,
                       NeuralNetwork nn)
@@ -173,7 +169,7 @@ public static class Globals
     public const int BITS_PER_PARAMETER = 8;
     public const int PARAMETER_COUNT = 9;
     public const int TOURNAMENT_SELECTION_COUNT = 3;
-    public const int GENERATION_COUNT = 500;
+    public const int GENERATION_COUNT = 1000;
     public const double LOWER_BOUND = -10.0;
     public const double UPPER_BOUND = 10.0;
     public const double MUTATION_RATE = 0.25;
@@ -218,7 +214,6 @@ class Specimen
         }
 
         Bits = sb.ToString();
-
         RedecodeBits();
     }
 
@@ -236,12 +231,6 @@ class Specimen
     public Specimen(Specimen specimen)
     {
         Bits = specimen.Bits;
-
-        if (Bits.Length > Globals.BITS_PER_PARAMETER * Globals.PARAMETER_COUNT)
-        {
-            throw new Exception("bad length");
-        }
-
         RedecodeBits();
     }
 
@@ -264,13 +253,6 @@ class Specimen
 
     private string GetParameter(int parameter)
     {
-        if (parameter < 0 || parameter >= Globals.PARAMETER_COUNT)
-        {
-            throw new ArgumentOutOfRangeException(
-                $"Prawidłowe wartości parametrów to 0...{Globals.PARAMETER_COUNT - 1}, podany parametr to: {parameter}"
-            );
-        }
-
         return Bits.Substring(parameter * Globals.BITS_PER_PARAMETER, Globals.BITS_PER_PARAMETER);
     }
 
@@ -386,8 +368,6 @@ class NeuralNetwork
             SetValues([input.Item1, input.Item2]).Forward();
             Console.WriteLine("Wartości wejściowe: ({0},{1}), wynik: {2}({3}), oczekiwane: {4}, błąd: {5}", input.Item1, input.Item2, Result.ToString("F15"), (Result <= 0.5 ? 0 : 1), expected, Math.Abs(Result - expected).ToString("F15"));
         }
-
-        //Console.WriteLine("W1: {0}, W2: {1}, BIAS: {2}", vals[GetParameter(0)], vals[GetParameter(1)], vals[GetParameter(2)]);
     }
 
     public NeuralNetwork Forward()
